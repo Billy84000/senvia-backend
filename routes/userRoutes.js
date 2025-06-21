@@ -107,4 +107,44 @@ router.get("/getUserByEmail", async (req, res) => {
   }
 });
 
+// Modifier le rôle (app_metadata)
+router.post("/setAdminRole", async (req, res) => {
+  const { email } = req.body;
+  const adminKey = req.headers["x-admin-key"];
+
+  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: "Non autorisé" });
+  }
+  if (!email) return res.status(400).json({ error: "email requis" });
+
+  try {
+    // 1. Rechercher l'utilisateur par email
+    const { data: usersData, error: listError } = await supabase.auth.admin.listUsers({ email });
+    if (listError) throw listError;
+
+    const user = usersData?.users?.[0];
+    if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
+
+    const user_id = user.id;
+    const currentProvider = user.app_metadata?.provider || "email";
+
+    // 2. Mise à jour du rôle dans app_metadata
+    const { data: updatedUser, error: updateError } = await supabase.auth.admin.updateUserById(user_id, {
+      app_metadata: {
+        provider: currentProvider,
+        role: "admin",
+        roles: ["admin"]
+      }
+    });
+    if (updateError) throw updateError;
+
+    res.json({ message: `Rôle 'admin' assigné à ${email}`, user: updatedUser });
+  } catch (err) {
+    console.error("❌ Erreur :", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 export default router;
