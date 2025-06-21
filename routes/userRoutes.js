@@ -202,23 +202,4 @@ router.post("/updateUserMetadata", async (req, res) => {
   }
 });
 
-router.post("/patchSuperAdmin", async (req, res) => {
-  const adminKey = req.headers["x-admin-key"];
-  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
-    return res.status(401).json({ error: "Non autorisé" });
-  }
-
-  const user_id = "60f3fac0-caa2-4b1f-9516-9f3738b47730"; // <-- Ton UID super admin
-  try {
-    const { data, error } = await supabase.auth.admin.updateUserById(user_id, {
-      user_metadata: { role: "admin", nom: "Super Admin" }
-    });
-    if (error) throw error;
-    res.json({ message: "Patched", user: data });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
 export default router;
