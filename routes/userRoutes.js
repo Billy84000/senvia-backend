@@ -46,7 +46,65 @@ router.get("/listUsers", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-  console.log("✅ SUPABASE_URL =", process.env.SUPABASE_URL);
+});
+
+// Ping pour test et UptimeRobot
+router.get("/ping", (req, res) => {
+  res.json({ message: "pong" });
+});
+
+// Désactiver un utilisateur
+router.post("/disableUser", async (req, res) => {
+  const { user_id } = req.body;
+  const adminKey = req.headers["x-admin-key"];
+  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: "Non autorisé" });
+  }
+  if (!user_id) return res.status(400).json({ error: "user_id requis" });
+
+  try {
+    const { error } = await supabase.auth.admin.updateUserById(user_id, { banned: true });
+    if (error) throw error;
+    res.json({ message: "Utilisateur désactivé" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Réactiver un utilisateur
+router.post("/enableUser", async (req, res) => {
+  const { user_id } = req.body;
+  const adminKey = req.headers["x-admin-key"];
+  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: "Non autorisé" });
+  }
+  if (!user_id) return res.status(400).json({ error: "user_id requis" });
+
+  try {
+    const { error } = await supabase.auth.admin.updateUserById(user_id, { banned: false });
+    if (error) throw error;
+    res.json({ message: "Utilisateur réactivé" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Rechercher un utilisateur par email
+router.get("/getUserByEmail", async (req, res) => {
+  const email = req.query.email;
+  const adminKey = req.headers["x-admin-key"];
+  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: "Non autorisé" });
+  }
+  if (!email) return res.status(400).json({ error: "email requis" });
+
+  try {
+    const { data, error } = await supabase.auth.admin.listUsers({ email });
+    if (error) throw error;
+    res.json({ user: data.users[0] || null });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;
