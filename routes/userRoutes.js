@@ -107,6 +107,43 @@ router.get("/getUserByEmail", async (req, res) => {
   }
 });
 
+router.post("/setUserRole", async (req, res) => {
+  const { email, role, super_admin } = req.body;
+  const adminKey = req.headers["x-admin-key"];
+
+  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: "Non autorisé" });
+  }
+  if (!email || !role) return res.status(400).json({ error: "email et role requis" });
+
+  try {
+    const { data: usersData, error: listError } = await supabase.auth.admin.listUsers({ email });
+    if (listError) throw listError;
+
+    const user = usersData?.users?.[0];
+    if (!user) return res.status(404).json({ error: "Utilisateur non trouvé" });
+
+    const user_id = user.id;
+    const currentProvider = user.app_metadata?.provider || "email";
+
+    const { data, error: updateError } = await supabase.auth.admin.updateUserById(user_id, {
+      app_metadata: {
+        provider: currentProvider,
+        role,
+        roles: [role],
+        super_admin: super_admin === true
+      }
+    });
+
+    if (updateError) throw updateError;
+
+    res.json({ message: `Rôle '${role}' attribué à ${email} (super_admin=${super_admin})`, user: data });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Modifier le rôle (app_metadata)
 router.post("/setAdminRole", async (req, res) => {
   const { email } = req.body;
@@ -145,6 +182,25 @@ router.post("/setAdminRole", async (req, res) => {
   }
 });
 
+router.post("/updateUserMetadata", async (req, res) => {
+  const { user_id, metadata } = req.body;
+  const adminKey = req.headers["x-admin-key"];
+
+  if (adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: "Non autorisé" });
+  }
+  if (!user_id || !metadata) return res.status(400).json({ error: "user_id et metadata requis" });
+
+  try {
+    const { data, error } = await supabase.auth.admin.updateUserById(user_id, {
+      user_metadata: metadata
+    });
+    if (error) throw error;
+    res.json({ message: "Metadata mise à jour", user: data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 export default router;
