@@ -202,4 +202,8 @@ router.post("/updateUserMetadata", async (req, res) => {
   }
 });
 
+console.log("Clé reçue:", adminKey);
+console.log("Clé serveur:", process.env.ADMIN_SECRET_KEY);
+console.log("Body reçu:", req.body);
+
 export default router;
