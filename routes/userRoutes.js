@@ -75,6 +75,11 @@ router.post("/disableUser", async (req, res) => {
 router.post("/enableUser", async (req, res) => {
   const { user_id } = req.body;
   const adminKey = req.headers["x-admin-key"];
+
+  console.log("Clé reçue:", adminKey);
+console.log("Clé serveur:", process.env.ADMIN_SECRET_KEY);
+console.log("Body reçu:", req.body);
+
   if (adminKey !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: "Non autorisé" });
   }
@@ -93,6 +98,11 @@ router.post("/enableUser", async (req, res) => {
 router.get("/getUserByEmail", async (req, res) => {
   const email = req.query.email;
   const adminKey = req.headers["x-admin-key"];
+
+  console.log("Clé reçue:", adminKey);
+console.log("Clé serveur:", process.env.ADMIN_SECRET_KEY);
+console.log("Body reçu:", req.body);
+
   if (adminKey !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: "Non autorisé" });
   }
@@ -110,6 +120,10 @@ router.get("/getUserByEmail", async (req, res) => {
 router.post("/setUserRole", async (req, res) => {
   const { email, role, super_admin } = req.body;
   const adminKey = req.headers["x-admin-key"];
+
+  console.log("Clé reçue:", adminKey);
+console.log("Clé serveur:", process.env.ADMIN_SECRET_KEY);
+console.log("Body reçu:", req.body);
 
   if (adminKey !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: "Non autorisé" });
@@ -149,6 +163,10 @@ router.post("/setAdminRole", async (req, res) => {
   const { email } = req.body;
   const adminKey = req.headers["x-admin-key"];
 
+  console.log("Clé reçue:", adminKey);
+console.log("Clé serveur:", process.env.ADMIN_SECRET_KEY);
+console.log("Body reçu:", req.body);
+
   if (adminKey !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: "Non autorisé" });
   }
@@ -186,6 +204,10 @@ router.post("/updateUserMetadata", async (req, res) => {
   const { user_id, metadata } = req.body;
   const adminKey = req.headers["x-admin-key"];
 
+console.log("Clé reçue:", adminKey);
+console.log("Clé serveur:", process.env.ADMIN_SECRET_KEY);
+console.log("Body reçu:", req.body);
+
   if (adminKey !== process.env.ADMIN_SECRET_KEY) {
     return res.status(401).json({ error: "Non autorisé" });
   }
@@ -201,9 +223,5 @@ router.post("/updateUserMetadata", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-console.log("Clé reçue:", adminKey);
-console.log("Clé serveur:", process.env.ADMIN_SECRET_KEY);
-console.log("Body reçu:", req.body);
 
 export default router;
