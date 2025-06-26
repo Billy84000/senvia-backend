@@ -66,7 +66,13 @@ router.post("/disableUser", async (req, res) => {
   if (!user_id) return res.status(400).json({ error: "user_id requis" });
 
   try {
-    const { error } = await supabase.auth.admin.updateUserById(user_id, { banned: true });
+    // On récupère le user d'abord
+    const { data: userData } = await supabase.auth.admin.getUserById(user_id);
+    const currentMeta = userData?.user?.user_metadata || {};
+    const { error } = await supabase.auth.admin.updateUserById(user_id, {
+      banned: true, // tente le vrai ban Supabase
+      user_metadata: { ...currentMeta, banned: true }
+    });
     if (error) throw error;
     res.json({ message: "Utilisateur désactivé" });
   } catch (err) {
@@ -84,7 +90,13 @@ router.post("/enableUser", async (req, res) => {
   if (!user_id) return res.status(400).json({ error: "user_id requis" });
 
   try {
-    const { error } = await supabase.auth.admin.updateUserById(user_id, { banned: false });
+    // On récupère le user d'abord
+    const { data: userData } = await supabase.auth.admin.getUserById(user_id);
+    const currentMeta = userData?.user?.user_metadata || {};
+    const { error } = await supabase.auth.admin.updateUserById(user_id, {
+      banned: false, // tente le vrai ban Supabase
+      user_metadata: { ...currentMeta, banned: false }
+    });
     if (error) throw error;
     res.json({ message: "Utilisateur réactivé" });
   } catch (err) {
