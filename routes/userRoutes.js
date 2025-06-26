@@ -42,6 +42,9 @@ router.get("/listUsers", async (req, res) => {
   try {
     const { data, error } = await supabase.auth.admin.listUsers();
     if (error) throw error;
+    console.log("---- LIST USERS RESULT ----");
+    console.dir(data.users, { depth: null });
+    // Ajoute ce log pour bien voir si banned apparait vraiment !
     res.json({ users: data.users });
   } catch (err) {
     res.status(500).json({ error: err.message });
